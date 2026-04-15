@@ -5,7 +5,7 @@ import gm.tienda_libros.modelo.Libro;
 import java.util.List;
 
 public interface ILibroServicio {
-    public List<Libro> listarLirbos();
+    public List<Libro> listarLibros();
 
     public Libro buscarLibroPorId(Integer idLibro);
 

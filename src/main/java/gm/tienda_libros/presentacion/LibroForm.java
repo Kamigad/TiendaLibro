@@ -13,7 +13,7 @@ public class LibroForm extends JFrame {
     LibroServicio libroServicio;
     private JPanel panel;
     private JTable tablaLibros;
-    private DefaultTableModel tablamodeloLirbos;
+    private DefaultTableModel tablamodeloLibros;
 
     @Autowired
     public LibroForm(LibroServicio libroServicio){
@@ -35,10 +35,28 @@ public class LibroForm extends JFrame {
 
     private void createUIComponents() {
         // TODO: place custom component creation code here
-        this.tablamodeloLirbos = new DefaultTableModel(0, 5);
+        this.tablamodeloLibros = new DefaultTableModel(0, 5);
         String[] cabeceros = {"Id", "Libro", "Autor", "Precio", "Existencias"};
-        tablamodeloLirbos.setColumnIdentifiers(cabeceros);
+        tablamodeloLibros.setColumnIdentifiers(cabeceros);
         //Instanciar el objeto JTable
-        this.tablaLibros = new JTable(tablamodeloLirbos);
+        this.tablaLibros = new JTable(tablamodeloLibros);
+        listarLibros();
+    }
+
+    private void listarLibros(){
+        // Limpiar la tabla
+        tablamodeloLibros.setRowCount(0);
+        // Obtener los libros
+        var libros = libroServicio.listarLibros();
+        libros.forEach((libro) -> {
+            Object[] renglonLibro = {
+              libro.getIdLibro(),
+              libro.getNombreLibro(),
+              libro.getAutor(),
+              libro.getPrecio(),
+              libro.getExistencias()
+            };
+            this.tablamodeloLibros.addRow(renglonLibro);
+        });
     }
 }

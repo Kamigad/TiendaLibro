@@ -1,6 +1,7 @@
 package gm.tienda_libros.presentacion;
 
 import gm.tienda_libros.Servicio.LibroServicio;
+import gm.tienda_libros.modelo.Libro;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +27,7 @@ public class LibroForm extends JFrame {
     public LibroForm(LibroServicio libroServicio){
         this.libroServicio = libroServicio;
         iniciarForma();
-        agregarButton.addActionListener(e -> {
-
-        });
+        agregarButton.addActionListener(e -> agregarLibro());
     }
 
     private void iniciarForma(){
@@ -51,6 +50,40 @@ public class LibroForm extends JFrame {
         //Instanciar el objeto JTable
         this.tablaLibros = new JTable(tablamodeloLibros);
         listarLibros();
+    }
+
+    private void agregarLibro(){
+        // Leer los valores del formulario
+        if(libroTexto.getText().equals("")){
+            mostrarMensaje("Proporciona el nombre del libro");
+            libroTexto.requestFocusInWindow();
+            return;
+        }
+        var nombreLibro = libroTexto.getText();
+        var autor = autorTexto.getText();
+        var precio = Double.parseDouble(precioTexto.getText());
+        var existencias = Integer.parseInt(existenciasTexto.getText());
+        // Crear el objeto libro
+        var libro = new Libro();
+        libro.setNombreLibro(nombreLibro);
+        libro.setAutor(autor);
+        libro.setPrecio(precio);
+        libro.setExistencias(existencias);
+        this.libroServicio.guardarLibro(libro);
+        mostrarMensaje("Se agrego el libro...");
+        limpiarFormulario();
+        listarLibros();
+    }
+
+    private void limpiarFormulario(){
+        libroTexto.setText("");
+        autorTexto.setText("");
+        precioTexto.setText("");
+        existenciasTexto.setText("");
+    }
+
+    private void mostrarMensaje(String mensaje){
+        JOptionPane.showMessageDialog(this, mensaje);
     }
 
     private void listarLibros(){

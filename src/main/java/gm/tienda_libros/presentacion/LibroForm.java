@@ -41,6 +41,7 @@ public class LibroForm extends JFrame {
             }
         });
         modificarButton.addActionListener(e -> modificarLibro());
+        eliminarButton.addActionListener(e -> eliminarLibro());
     }
 
     private void iniciarForma(){
@@ -97,7 +98,7 @@ public class LibroForm extends JFrame {
         if (this.idTexto.getText().equals("")){// verificamos que el id no sea nulo
             mostrarMensaje("Debe seleccionar el libro que desea modificar");
         }else {// verificamos que el nombre del libro no sea nulo
-            if (libroTexto.equals("")){
+            if (libroTexto.getText().equals("")){
                 mostrarMensaje("Proporcione el nombre del libro...");
                 libroTexto.requestFocusInWindow();
                 return;
@@ -114,6 +115,29 @@ public class LibroForm extends JFrame {
         //finalmente se actualiza el libro en la base de datos
         libroServicio.guardarLibro(libro);
         mostrarMensaje("Libro modificado...");
+        limpiarFormulario();
+        listarLibros();
+    }
+
+    private void eliminarLibro(){
+        //Verificamos que hayan elegido un libro ya existente
+        if(idTexto.getText().equals("")){
+            mostrarMensaje("Debes elegir un libro primero...");
+        } else {//verificamos que tenga el nombre del libro
+            if(libroTexto.getText().equals("")){
+                mostrarMensaje("Proporcione el nombre del libro");
+                return;
+            }
+        }
+        //Ahora tomamos la informacionn del formulario
+        var id = Integer.parseInt(idTexto.getText());
+        var nombre = libroTexto.getText();
+        var autor = autorTexto.getText();
+        var precio = Double.parseDouble(precioTexto.getText());
+        var existencias = Integer.parseInt(existenciasTexto.getText());
+        var libro = new Libro(id,nombre,autor,precio,existencias);
+        libroServicio.eliminarLibro(libro);
+        mostrarMensaje("Libro eliminado");
         limpiarFormulario();
         listarLibros();
     }

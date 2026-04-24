@@ -41,6 +41,7 @@ public class LibroForm extends JFrame {
             }
         });
         modificarButton.addActionListener(e -> modificarLibro());
+        eliminarButton.addActionListener(e -> eliminarLibro());
     }
 
     private void iniciarForma(){
@@ -50,8 +51,8 @@ public class LibroForm extends JFrame {
         setSize(900,700);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension tamanioPantalla = toolkit.getScreenSize();
-        int x = (tamanioPantalla.width - getWidth()/ 2);
-        int y = (tamanioPantalla.height - getHeight()/ 2);
+        int x = (tamanioPantalla.width - getWidth())/2;
+        int y = (tamanioPantalla.height - getHeight())/2;
         setLocation(x,y);
     }
 
@@ -61,11 +62,18 @@ public class LibroForm extends JFrame {
         idTexto = new JTextField("");
         idTexto.setVisible(false);
 
-        this.tablamodeloLibros = new DefaultTableModel(0, 5);
+        this.tablamodeloLibros = new DefaultTableModel(0, 5){
+            @Override
+            public boolean isCellEditable(int row, int column){
+                return false;
+            }
+        };
         String[] cabeceros = {"Id", "Libro", "Autor", "Precio", "Existencias"};
         tablamodeloLibros.setColumnIdentifiers(cabeceros);
         //Instanciar el objeto JTable
         this.tablaLibros = new JTable(tablamodeloLibros);
+        // Evitar que se selccionen varios registros
+        tablaLibros.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         listarLibros();
     }
 
@@ -75,6 +83,12 @@ public class LibroForm extends JFrame {
             mostrarMensaje("Proporciona el nombre del libro");
             libroTexto.requestFocusInWindow();
             return;
+        } else {
+            if (!idTexto.getText().isEmpty()){
+                mostrarMensaje("No seleccione un libro ya existente");
+                limpiarFormulario();
+                return;
+            }
         }
         var nombreLibro = libroTexto.getText();
         var autor = autorTexto.getText();
@@ -97,7 +111,7 @@ public class LibroForm extends JFrame {
         if (this.idTexto.getText().equals("")){// verificamos que el id no sea nulo
             mostrarMensaje("Debe seleccionar el libro que desea modificar");
         }else {// verificamos que el nombre del libro no sea nulo
-            if (libroTexto.equals("")){
+            if (libroTexto.getText().equals("")){
                 mostrarMensaje("Proporcione el nombre del libro...");
                 libroTexto.requestFocusInWindow();
                 return;
@@ -116,6 +130,22 @@ public class LibroForm extends JFrame {
         mostrarMensaje("Libro modificado...");
         limpiarFormulario();
         listarLibros();
+    }
+
+    private void eliminarLibro(){
+        var renglon = tablaLibros.getSelectedRow();
+        if(renglon != -1){
+            String idLibro = tablaLibros.getModel().getValueAt(renglon, 0).toString();
+            var libro = new Libro();
+            libro.setIdLibro(Integer.parseInt(idLibro));
+            libroServicio.eliminarLibro(libro);
+            mostrarMensaje("libro " + idLibro + " eliminado.");
+            limpiarFormulario();
+            listarLibros();
+        }
+        else {
+            mostrarMensaje("No se ha seleccionado ningun libro a eliminar");
+        }
     }
 
     private void cargarLibroSeleccionado(){

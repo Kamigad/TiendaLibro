@@ -51,8 +51,8 @@ public class LibroForm extends JFrame {
         setSize(900,700);
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension tamanioPantalla = toolkit.getScreenSize();
-        int x = (tamanioPantalla.width - getWidth()/ 2);
-        int y = (tamanioPantalla.height - getHeight()/ 2);
+        int x = (tamanioPantalla.width - getWidth())/2;
+        int y = (tamanioPantalla.height - getHeight())/2;
         setLocation(x,y);
     }
 
@@ -62,11 +62,18 @@ public class LibroForm extends JFrame {
         idTexto = new JTextField("");
         idTexto.setVisible(false);
 
-        this.tablamodeloLibros = new DefaultTableModel(0, 5);
+        this.tablamodeloLibros = new DefaultTableModel(0, 5){
+            @Override
+            public boolean isCellEditable(int row, int column){
+                return false;
+            }
+        };
         String[] cabeceros = {"Id", "Libro", "Autor", "Precio", "Existencias"};
         tablamodeloLibros.setColumnIdentifiers(cabeceros);
         //Instanciar el objeto JTable
         this.tablaLibros = new JTable(tablamodeloLibros);
+        // Evitar que se selccionen varios registros
+        tablaLibros.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         listarLibros();
     }
 
@@ -76,6 +83,12 @@ public class LibroForm extends JFrame {
             mostrarMensaje("Proporciona el nombre del libro");
             libroTexto.requestFocusInWindow();
             return;
+        } else {
+            if (!idTexto.getText().isEmpty()){
+                mostrarMensaje("No seleccione un libro ya existente");
+                limpiarFormulario();
+                return;
+            }
         }
         var nombreLibro = libroTexto.getText();
         var autor = autorTexto.getText();
@@ -120,26 +133,19 @@ public class LibroForm extends JFrame {
     }
 
     private void eliminarLibro(){
-        //Verificamos que hayan elegido un libro ya existente
-        if(idTexto.getText().equals("")){
-            mostrarMensaje("Debes elegir un libro primero...");
-        } else {//verificamos que tenga el nombre del libro
-            if(libroTexto.getText().equals("")){
-                mostrarMensaje("Proporcione el nombre del libro");
-                return;
-            }
+        var renglon = tablaLibros.getSelectedRow();
+        if(renglon != -1){
+            String idLibro = tablaLibros.getModel().getValueAt(renglon, 0).toString();
+            var libro = new Libro();
+            libro.setIdLibro(Integer.parseInt(idLibro));
+            libroServicio.eliminarLibro(libro);
+            mostrarMensaje("libro " + idLibro + " eliminado.");
+            limpiarFormulario();
+            listarLibros();
         }
-        //Ahora tomamos la informacionn del formulario
-        var id = Integer.parseInt(idTexto.getText());
-        var nombre = libroTexto.getText();
-        var autor = autorTexto.getText();
-        var precio = Double.parseDouble(precioTexto.getText());
-        var existencias = Integer.parseInt(existenciasTexto.getText());
-        var libro = new Libro(id,nombre,autor,precio,existencias);
-        libroServicio.eliminarLibro(libro);
-        mostrarMensaje("Libro eliminado");
-        limpiarFormulario();
-        listarLibros();
+        else {
+            mostrarMensaje("No se ha seleccionado ningun libro a eliminar");
+        }
     }
 
     private void cargarLibroSeleccionado(){
